@@ -1,0 +1,14 @@
+[project]
+name = "DuNaiBot"
+version = "0.1.0"
+description = "DuNaiBot"
+readme = "README.md"
+requires-python = ">=3.8, <4.0"
+
+[tool.nonebot]
+adapters = [
+    { name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11" }
+]
+plugins = ["nonebot_plugin_apscheduler", "nonebot_plugin_tortoise_orm", "nonebot_plugin_wordcloud", "nonebot_plugin_chatrecorder", "nonebot_plugin_picstatus", "nonebot_plugin_analysis_bilibili", "nonebot_plugin_abstract", "haruka_bot", "nonebot_plugin_leetcode2", "nonebot_plugin_manager"]
+plugin_dirs = ["src/plugins"]
+builtin_plugins = []
