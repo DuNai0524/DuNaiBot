@@ -118,15 +118,15 @@ async def getGoldList(group_id: int, bot: Bot) -> Message:
     index = 1
     for user in gold_list:
         username = get_nickName(user_list, user.user_id)
-        if username is not None:
+        if username is not "":
             msg_text += f"{index}. {get_nickName(user_list, user.user_id)}({user.user_id})--{user.gold}金币\n"
             index += 1
     msg += MessageSegment.text(msg_text)
     return msg
 
 
-def get_nickName(usr_list: list, user_id: int) -> Any | None:
+def get_nickName(usr_list: list, user_id: int) -> str:
     for t in usr_list:
         if t['user_id'] == user_id:
             return t['nickname']
-        return None
+    return ""

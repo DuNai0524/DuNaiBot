@@ -18,7 +18,7 @@ url_week = "https://v0.yiketianqi.com/free/week?"
 appid = "41432358"
 appsecret = "3C9Dy2VC"
 url_2 = f"http://zh.wttr.in/"
-#
+
 # weatherForcast = on_command('三日天气', aliases={"3dw"})
 # weatherCheck = on_command('今日天气', aliases={"weather"})
 
@@ -51,10 +51,9 @@ require("nonebot_plugin_apscheduler")
 # 中间有空格") return else: city = argv[0] await weatherForcast.send("请等待...正在获取天气数据中", at_sender=True) await
 # weatherForcast.send(MessageSegment.image(file=url_2 + f"{escape(city)}.png", cache=False), at_sender=True)
 
-
-'''
+"""
 以上注释代码均被废除
-'''
+"""
 
 time_list = get_driver().config.weather_inform_time if hasattr(get_driver().config, "weather_inform_time") else list()
 
