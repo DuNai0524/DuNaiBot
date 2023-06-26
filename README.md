@@ -1,14 +1,31 @@
 # DuNaiBot
 
-## How to start
+## 简介
+DuNaiBot 专为您乡群打造  
+由于开发只有一人，且学业较忙，因此无精力进行频繁更新
 
-1. generate project using `nb create` .
-2. create your plugin using `nb plugin create` .
-3. writing your plugins under `src/plugins` folder.
-4. run your bot using `nb run --reload` .
+## 文档
 
-## Documentation
+还在编辑中
 
-See [Docs](https://v2.nonebot.dev/)
+## 更新内容
 
-- [ ] 测试
+版本号:v0.2.0_b
+
+### 本次Bot更新内容
+1. 规范插件命名
+2. 金币功能改为所有群互通
+3. 删除了天气查询功能，只保留了天气预报功能，天气功能补充待后续加入
+4. 添加了转账功能，若要转账请使用 "/dunai 转账 at人 金额数量"
+5. 添加了超级大奖池，所有人都可以抽，如果中奖了说不定能获取丰厚的奖励...
+6. 签到倍率修改，从一天的 `1-5` 倍变成了 `1-10` 倍，一次能获得的幸运加成金币数量从 `40` 变成了 `50`
+7. 添加了 maimai 排队功能，请善用此功能。该功能包含的指令如下：
+   1. "/dunai 查询人数 机厅别称" 可以查询当前在机厅中的人数
+   2. "/dunai 退勤 别称 人数" 向机厅中减少出勤人数
+   3. "/dunai 出勤 别称 人数" 向机厅中增加出勤人数
+
+
+## TODO
+- [ ] MaimaiB50功能
+- [ ] 天气查询
+- [ ] 其他有意思的插件与功能

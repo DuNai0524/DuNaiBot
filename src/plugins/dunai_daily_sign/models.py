@@ -76,7 +76,6 @@ class Daily_Sign(Model):
     ) -> date:
         record, _ = await Daily_Sign.get_or_create(
             user_id=user_id,
-
         )
         return record.last_sign
 
