@@ -25,11 +25,11 @@ async def get_big_award(user_id:int) -> Message:
 
     total_gold = await Daily_Sign.get_gold(award_user_id)
 
-    logger.log(f"[抽奖]用户{user_id}进行大奖池抽奖")
+    logger.debug(f"[抽奖]用户{user_id}进行大奖池抽奖")
     # 两个1-100之间的随机数 相等则是中奖
     rand_1 = random.randint(1,100)
     rand_2 = random.randint(1,100)
-    logger.log(f"[抽奖]参数1:{rand_1},参数2:{rand_2}")
+    logger.debug(f"[抽奖]参数1:{rand_1},参数2:{rand_2}")
     if rand_1 == rand_2:
         msg_text += "恭喜中奖!\n"
         msg_text += f"获得金币:{total_gold + award_num}\n"
