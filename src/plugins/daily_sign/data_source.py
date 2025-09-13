@@ -1,5 +1,7 @@
 import random
 
+import httpx
+
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.log import logger
 
@@ -29,14 +31,34 @@ async def get_sign_in(user_id :int, group_id: int) -> Message:
         today_lucky=random.randint(1, 10),
     )
 
+    # 生成一言
+    async with httpx.AsyncClient() as client:
+        response = response = await client.get("https://v1.hitokoto.cn?c=a&c=b&c=c&c=d&c=h")
+    if response.is_error:
+        logger.error("获取一言失败")
+        return
+    
+    data = response.json()
+    yiyan = data["hitokoto"]
+    add = ""
+    if works := data["from"]:
+        add += f"《{works}》"
+    if from_who := data["from_who"]:
+        add += f"{from_who}"
+    if add:
+        yiyan += f"\n——{add}"
+
+
     # 生成签到图片
     try:
-        image_buffer = create_sign_in_image(
+        image_buffer = await create_sign_in_image(
             sign_rank=sign_num,
             today_gold=data.today_gold,
             all_gold=data.all_gold,
             sign_times=data.sign_times,
-            today_lucky=data.today_lucky
+            today_lucky=data.today_lucky,
+            user_id=user_id,
+            yiyan=yiyan
         )
         
         # 将图片添加到消息中
