@@ -3,6 +3,7 @@ import random
 import httpx
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.log import logger
 
 from src.plugins.daily_sign.model import Daily_Sign
@@ -11,11 +12,13 @@ from src.utils.image_generator import create_sign_in_image
 from datetime import date
 
 
-async def get_sign_in(user_id :int, group_id: int) -> Message:
+async def get_sign_in(user_id :int, group_id: int, bot: Bot) -> Message:
     msg = Message()
 
     last_sign = await Daily_Sign.get_last_sign_time(user_id)
     today = date.today()
+    user_info = await bot.get_stranger_info(user_id=user_id)
+    user_name = user_info['nick']
     # logger.debug(f"last_sign: {last_sign}")
     # logger.debug(f"today: {today}")
     if today == last_sign:
@@ -33,17 +36,17 @@ async def get_sign_in(user_id :int, group_id: int) -> Message:
 
     # 生成一言
     async with httpx.AsyncClient() as client:
-        response = response = await client.get("https://v1.hitokoto.cn?c=a&c=b&c=c&c=d&c=h")
+        response = await client.get("https://v1.hitokoto.cn?c=a&c=b&c=c&c=d&c=h")
     if response.is_error:
         logger.error("获取一言失败")
         return
     
-    data = response.json()
-    yiyan = data["hitokoto"]
+    res_data = response.json()
+    yiyan = res_data["hitokoto"]
     add = ""
-    if works := data["from"]:
+    if works := res_data["from"]:
         add += f"《{works}》"
-    if from_who := data["from_who"]:
+    if from_who := res_data["from_who"]:
         add += f"{from_who}"
     if add:
         yiyan += f"\n——{add}"
@@ -58,7 +61,8 @@ async def get_sign_in(user_id :int, group_id: int) -> Message:
             sign_times=data.sign_times,
             today_lucky=data.today_lucky,
             user_id=user_id,
-            yiyan=yiyan
+            yiyan=yiyan,
+            user_name=user_name
         )
         
         # 将图片添加到消息中

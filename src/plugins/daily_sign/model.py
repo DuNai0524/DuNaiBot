@@ -62,7 +62,7 @@ class Daily_Sign(Model):
     @classmethod
     async def get_last_sign_time(cls,
                                  user_id:int):
-        record = await Daily_Sign.get_or_none(
+        record, _ = await Daily_Sign.get_or_create(
             user_id=user_id,
         )
         return record.last_sign
