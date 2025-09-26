@@ -6,12 +6,15 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.log import logger
 
-from src.plugins.daily_sign.model import Daily_Sign
+from src.plugins.plugin_daily_sign.model import Daily_Sign
 from src.utils.image_generator import create_sign_in_image
 
 from datetime import date
 
 
+"""
+每日签到
+"""
 async def get_sign_in(user_id :int, group_id: int, bot: Bot) -> Message:
     msg = Message()
 
@@ -77,4 +80,27 @@ async def get_sign_in(user_id :int, group_id: int, bot: Bot) -> Message:
         msg_text += f"累计签到次数: {data.sign_times}"
         msg += MessageSegment.text(msg_text)
 
+    return msg
+
+
+"""
+获取排名
+"""
+async def get_Lineup(group_id: int, bot: Bot) -> Message:
+    msg = Message()
+    gold_list = await Daily_Sign.get_list()
+    group_list = await bot.get_group_member_list(group_id=group_id)
+
+    msg_text = ""
+    msg_text += "本群金币排名如下:\n"
+
+    rank = 1
+    for user, index in gold_list:
+        for group_user in group_list:
+            if user.user_id == group_user['user_id']:
+                msg_text += f"第 {rank} 名: {group_user['nickname']} (金币: {user.gold}, 签到次数: {user.sign_count})\n"
+                rank += 1
+                break
+
+    msg += MessageSegment.text(msg_text)
     return msg

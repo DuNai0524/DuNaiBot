@@ -3,7 +3,7 @@ from tortoise.models import Model
 
 from datetime import date
 
-from src.plugins.daily_sign.data_pojo import Sign_Info
+from src.plugins.plugin_daily_sign.data_pojo import Sign_Info
 
 
 class Daily_Sign(Model):
@@ -22,7 +22,7 @@ class Daily_Sign(Model):
     total_sign = fields.IntField(default=0)
 
     class Meta:
-        table = "daily_sign"
+        table = "plugin_daily_sign"
         table_description = "每日签到表"
 
 
@@ -66,6 +66,16 @@ class Daily_Sign(Model):
             user_id=user_id,
         )
         return record.last_sign
+
+    """
+    获取整个列表
+    """
+    @classmethod
+    async def get_list(cls) -> list:
+        data = await Daily_Sign.filter().all()
+        data.sort(key = lambda t : t.gold, reverse = True)
+        return data
+
 
 
 
