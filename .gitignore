@@ -8,5 +8,10 @@
 # IDE
 .idea
 /test
-__pycache__
+
+# Python
+.venv/
+
+__pycache__/
+*.pyc
 .sqlite3
