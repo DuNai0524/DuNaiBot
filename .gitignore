@@ -8,3 +8,6 @@
 # IDE
 .idea
 /test
+
+# Python
+.venv/
