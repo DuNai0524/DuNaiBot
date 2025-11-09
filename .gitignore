@@ -8,3 +8,5 @@
 # IDE
 .idea
 /test
+__pycache__
+.sqlite3
