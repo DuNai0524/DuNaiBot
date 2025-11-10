@@ -3,7 +3,7 @@ from tortoise.models import Model
 
 from datetime import date
 
-from src.plugins.plugin_daily_common.data_pojo import Sign_Info, Get_Award_Info
+from src.plugins.plugin_daily_common.data_pojo import Sign_Info, Get_Award_Info, Prize_Pool_Info
 
 
 class Daily_Sign(Model):
@@ -124,6 +124,98 @@ class Daily_Sign(Model):
             reward_gold=reward_gold
         )
 
+
+class Prize_Pool(Model):
+    """
+    奖池表
+    只有一条记录，用于存储全局奖池金币数量
+    """
+    id = fields.IntField(pk=True, generated=True)
+    total_gold = fields.IntField(default=0)  # 奖池总金币数
+
+    class Meta:
+        table = "plugin_prize_pool"
+        table_description = "奖池表"
+
+    """
+    获取奖池信息
+    """
+    @classmethod
+    async def get_pool(cls):
+        pool, _ = await Prize_Pool.get_or_create(id=1)
+        return pool
+
+    """
+    奖池抽奖功能
+    概率计算：基础概率 + (投入金币 / 奖池金币) * 权重
+    金币越多，中奖概率越高
+    """
+    @classmethod
+    async def prize_lottery(cls, user_id: int, cost_gold: int) -> Prize_Pool_Info:
+        import random
+        
+        # 获取用户记录
+        user_record, _ = await Daily_Sign.get_or_create(user_id=user_id)
+        
+        # 检查金币是否足够
+        if user_record.gold < cost_gold:
+            raise ValueError(f"金币不足！当前拥有{user_record.gold}金币，需要{cost_gold}金币")
+        
+        # 获取奖池
+        pool = await cls.get_pool()
+        
+        # 扣除用户金币
+        user_record.gold -= cost_gold
+        
+        # 计算中奖概率
+        # 基础概率：5%
+        # 金币加成：投入金币占奖池的比例，最高加成45%
+        # 总概率范围：5% - 50%
+        base_probability = 5.0
+        if pool.total_gold > 0:
+            gold_ratio = cost_gold / pool.total_gold
+            bonus_probability = min(gold_ratio * 100, 45.0)  # 最高加成45%
+        else:
+            # 奖池为空时，给予固定加成
+            bonus_probability = min(cost_gold / 1000 * 5, 45.0)  # 每1000金币加5%，最高45%
+        
+        probability = base_probability + bonus_probability
+        
+        # 判断是否中奖
+        random_num = random.uniform(0, 100)
+        success = random_num < probability
+        
+        win_gold = 0
+        if success:
+            # 中奖：获得奖池所有金币
+            win_gold = pool.total_gold + cost_gold  # 包含本次投入
+            user_record.gold += win_gold
+            # 清空奖池
+            pool.total_gold = 0
+        else:
+            # 未中奖：金币进入奖池
+            pool.total_gold += cost_gold
+        
+        # 保存记录
+        await user_record.save(update_fields=["gold"])
+        await pool.save(update_fields=["total_gold"])
+        
+        return Prize_Pool_Info(
+            success=success,
+            cost_gold=cost_gold,
+            current_gold=user_record.gold,
+            probability=probability,
+            pool_gold=pool.total_gold,
+            win_gold=win_gold
+        )
+
+    """
+    查询奖池金币数量
+    """
+    @classmethod
+    async def get_pool_gold(cls) -> int:
+        pool = await cls.get_pool()
+        return pool.total_gold
 
 
 

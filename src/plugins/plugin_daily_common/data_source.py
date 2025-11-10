@@ -6,7 +6,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.log import logger
 
-from src.plugins.plugin_daily_common.model import Daily_Sign
+from src.plugins.plugin_daily_common.model import Daily_Sign, Prize_Pool
 from src.utils.image_generator import create_sign_in_image
 
 from datetime import date
@@ -141,4 +141,69 @@ async def get_Lineup(group_id: int, bot: Bot) -> Message:
                 break
 
     msg += MessageSegment.text(msg_text)
+    return msg
+
+
+"""
+奖池抽奖功能
+"""
+async def get_prize_award(user_id: int, cost_gold: int, bot: Bot) -> Message:
+    msg = Message()
+    
+    try:
+        # 执行奖池抽奖
+        result = await Prize_Pool.prize_lottery(user_id, cost_gold)
+        
+        # 构建消息
+        if result.success:
+            msg_text = f"🎊🎊🎊 恭喜你中大奖了！🎊🎊🎊\n"
+            msg_text += f"💰 投入金币: {result.cost_gold}\n"
+            msg_text += f"🎁 赢得奖池: {result.win_gold} 金币\n"
+            msg_text += f"💵 当前金币: {result.current_gold}\n"
+            msg_text += f"📊 本次中奖概率: {result.probability:.2f}%\n"
+            msg_text += f"🏆 奖池已清空，当前奖池: {result.pool_gold} 金币"
+        else:
+            msg_text = f"💔 很遗憾，未能中奖\n"
+            msg_text += f"💰 投入金币: {result.cost_gold}\n"
+            msg_text += f"💵 当前金币: {result.current_gold}\n"
+            msg_text += f"📊 本次中奖概率: {result.probability:.2f}%\n"
+            msg_text += f"🏆 当前奖池: {result.pool_gold} 金币\n"
+            msg_text += f"💡 提示: 投入更多金币可以提高中奖概率！"
+        
+        msg += MessageSegment.text(msg_text)
+        
+    except ValueError as e:
+        # 金币不足等错误
+        msg += MessageSegment.text(str(e))
+    except Exception as e:
+        # 其他错误
+        logger.error(f"奖池抽奖失败: {e}")
+        msg += MessageSegment.text(f"奖池抽奖失败: {str(e)}")
+    
+    return msg
+
+
+"""
+查询奖池金币
+"""
+async def get_prize_pool_info(bot: Bot) -> Message:
+    msg = Message()
+    
+    try:
+        pool_gold = await Prize_Pool.get_pool_gold()
+        
+        msg_text = f"🏆 当前奖池信息\n"
+        msg_text += f"💰 奖池金币: {pool_gold}\n"
+        msg_text += f"📌 玩法说明:\n"
+        msg_text += f"  • 投入金币参与抽奖\n"
+        msg_text += f"  • 未中奖金币进入奖池\n"
+        msg_text += f"  • 中奖获得奖池全部金币\n"
+        msg_text += f"  • 每次投入越多，中奖概率越高！"
+        
+        msg += MessageSegment.text(msg_text)
+        
+    except Exception as e:
+        logger.error(f"查询奖池失败: {e}")
+        msg += MessageSegment.text(f"查询奖池失败: {str(e)}")
+    
     return msg
