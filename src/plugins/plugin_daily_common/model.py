@@ -3,7 +3,7 @@ from tortoise.models import Model
 
 from datetime import date
 
-from src.plugins.plugin_daily_sign.data_pojo import Sign_Info
+from src.plugins.plugin_daily_common.data_pojo import Sign_Info, Get_Award_Info
 
 
 class Daily_Sign(Model):
@@ -20,6 +20,7 @@ class Daily_Sign(Model):
     gold = fields.IntField(default=0)
     sign_count = fields.IntField(default=0)
     total_sign = fields.IntField(default=0)
+    lottery_probability = fields.FloatField(default=10.0)  # 抽奖概率，初始为10%
 
     class Meta:
         table = "plugin_daily_sign"
@@ -75,6 +76,53 @@ class Daily_Sign(Model):
         data = await Daily_Sign.filter().all()
         data.sort(key = lambda t : t.gold, reverse = True)
         return data
+
+    """
+    抽奖功能
+    """
+    @classmethod
+    async def lottery(cls, user_id: int, cost_gold: int) -> Get_Award_Info:
+        import random
+        
+        # 获取或创建用户记录
+        record, _ = await Daily_Sign.get_or_create(user_id=user_id)
+        
+        # 检查金币是否足够
+        if record.gold < cost_gold:
+            raise ValueError(f"金币不足！当前拥有{record.gold}金币，需要{cost_gold}金币")
+        
+        # 扣除金币
+        record.gold -= cost_gold
+        
+        # 获取当前概率
+        current_probability = record.lottery_probability
+        
+        # 判断是否中奖
+        random_num = random.uniform(0, 100)
+        success = random_num < current_probability
+        
+        reward_gold = 0
+        if success:
+            # 中奖：奖励为消耗金币的2-3倍
+            reward_multiplier = random.uniform(2.0, 3.0)
+            reward_gold = int(cost_gold * reward_multiplier)
+            record.gold += reward_gold
+            # 中奖后重置概率
+            record.lottery_probability = 10.0
+        else:
+            # 未中奖：概率提升5%
+            record.lottery_probability = min(record.lottery_probability + 5.0, 100.0)
+        
+        # 保存记录
+        await record.save(update_fields=["gold", "lottery_probability"])
+        
+        return Get_Award_Info(
+            success=success,
+            cost_gold=cost_gold,
+            current_gold=record.gold,
+            current_probability=current_probability,
+            reward_gold=reward_gold
+        )
 
 
 

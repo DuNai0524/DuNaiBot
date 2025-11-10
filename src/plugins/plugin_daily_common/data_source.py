@@ -6,7 +6,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.adapters.onebot.v11.bot import Bot
 from nonebot.log import logger
 
-from src.plugins.plugin_daily_sign.model import Daily_Sign
+from src.plugins.plugin_daily_common.model import Daily_Sign
 from src.utils.image_generator import create_sign_in_image
 
 from datetime import date
@@ -82,6 +82,44 @@ async def get_sign_in(user_id :int, group_id: int, bot: Bot) -> Message:
 
     return msg
 
+"""
+抽奖功能
+"""
+async def get_award(user_id: int, cost_gold: int, bot: Bot) -> Message:
+    msg = Message()
+    
+    try:
+        # 执行抽奖
+        result = await Daily_Sign.lottery(user_id, cost_gold)
+        
+        # 构建消息
+        if result.success:
+            msg_text = f"🎉 恭喜你！抽奖成功！\n"
+            msg_text += f"💰 消耗金币: {result.cost_gold}\n"
+            msg_text += f"🎁 获得奖励: {result.reward_gold} 金币\n"
+            msg_text += f"💵 当前金币: {result.current_gold}\n"
+            msg_text += f"📊 本次中奖概率: {result.current_probability:.1f}%\n"
+            msg_text += f"🔄 下次抽奖概率已重置为: 10.0%"
+        else:
+            msg_text = f"😢 很遗憾，本次抽奖未中奖\n"
+            msg_text += f"💰 消耗金币: {result.cost_gold}\n"
+            msg_text += f"💵 当前金币: {result.current_gold}\n"
+            msg_text += f"📊 本次中奖概率: {result.current_probability:.1f}%\n"
+            msg_text += f"📈 下次抽奖概率提升至: {result.current_probability + 5.0:.1f}%\n"
+            msg_text += f"💪 继续加油，下次一定能中！"
+        
+        msg += MessageSegment.text(msg_text)
+        
+    except ValueError as e:
+        # 金币不足等错误
+        msg += MessageSegment.text(str(e))
+    except Exception as e:
+        # 其他错误
+        logger.error(f"抽奖失败: {e}")
+        msg += MessageSegment.text(f"抽奖失败: {str(e)}")
+    
+    return msg
+    
 
 """
 获取排名
