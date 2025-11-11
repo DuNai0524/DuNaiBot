@@ -8,7 +8,7 @@ from nonebot.adapters.onebot.v11.bot import Bot
 
 from src.plugins.plugin_daily_common.data_source import get_sign_in, get_Lineup, get_award, get_prize_award, get_prize_pool_info
 
-add_model("src.plugins.plugin_daily_sign.model")
+add_model("src.plugins.plugin_daily_common.model")
 
 
 sign = on_command("签到", permission=GROUP)
@@ -17,7 +17,7 @@ line_up = on_command("排名", permission=GROUP)
 
 lottery = on_command("抽奖", permission=GROUP)
 
-prize_lottery = on_command("奖池抽奖", aliases={"奖池"}, permission=GROUP)
+prize_lottery = on_command("下池", aliases={"奖池"}, permission=GROUP)
 
 prize_info = on_command("奖池信息", aliases={"查看奖池"}, permission=GROUP)
 
