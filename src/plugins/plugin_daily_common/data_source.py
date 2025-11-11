@@ -133,7 +133,7 @@ async def get_Lineup(group_id: int, bot: Bot) -> Message:
     msg_text += "本群金币排名如下:\n"
 
     rank = 1
-    for user, index in gold_list:
+    for user in gold_list:
         for group_user in group_list:
             if user.user_id == group_user['user_id']:
                 msg_text += f"第 {rank} 名: {group_user['nickname']} (金币: {user.gold}, 签到次数: {user.sign_count})\n"
