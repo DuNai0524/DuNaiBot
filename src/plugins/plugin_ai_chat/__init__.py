@@ -37,9 +37,6 @@ async def handle_ai_chat(event: MessageEvent, bot: Bot):
         f"[AI Chat] 用户 <y>{user_id}</y> 提问: <c>{user_message}</c>"
     )
     
-    # 发送"思考中"提示
-    await ai_chat.send("正在思考中...", at_sender=True)
-    
     # 调用 AI API
     ai_reply = await call_qwen_api(
         user_message=user_message,
