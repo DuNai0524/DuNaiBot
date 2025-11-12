@@ -1,0 +1,36 @@
+# 配置文件示例
+# 复制此文件为 ai_chat.yaml 并填入你的配置
+
+ai_chat:
+  # ==================== API 配置 ====================
+  # 通义千问 API Key（必填）
+  # 获取地址：https://dashscope.console.aliyun.com/
+  api_key: "your-api-key-here"
+  
+  # 使用的模型
+  # 可选值：qwen-turbo, qwen-plus, qwen-max, qwen-long
+  model: "qwen-turbo"
+  
+  # ==================== 生成参数 ====================
+  # 最大生成 token 数（影响回复长度）
+  max_tokens: 1500
+  
+  # 温度参数（0-2，越高越随机，建议 0.5-1.0）
+  temperature: 0.8
+  
+  # Top-p 采样参数（0-1）
+  top_p: 0.8
+  
+  # ==================== 功能开关 ====================
+  # 是否启用上下文记忆（多轮对话）
+  enable_context: true
+  
+  # 上下文最大轮数（每轮包含用户问题和 AI 回复）
+  context_max_length: 10
+  
+  # API 请求超时时间（秒）
+  request_timeout: 60
+  
+  # System Prompt 文件路径（相对于 config 目录）
+  # 如果为空或文件不存在，将使用默认 Prompt
+  prompt_file: "ai_chat_prompt.txt"

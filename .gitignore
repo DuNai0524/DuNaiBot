@@ -14,3 +14,6 @@
 
 __pycache__/
 *.pyc
+
+# 配置文件
+config/ai_chat.yaml

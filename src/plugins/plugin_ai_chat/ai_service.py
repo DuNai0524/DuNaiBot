@@ -72,11 +72,11 @@ async def call_qwen_api(
     config = get_config()
     
     # 检查 API Key
-    if not config.qwen_api_key:
-        return "错误：未配置 Qwen API Key，请在配置文件中设置 qwen_api_key"
+    if not config.api_key:
+        return "错误：未配置 Qwen API Key，请在 config/ai_chat.yaml 中设置 api_key"
     
     # 设置 API Key
-    dashscope.api_key = config.qwen_api_key
+    dashscope.api_key = config.api_key
     
     # 构建消息列表
     messages = []
@@ -101,12 +101,12 @@ async def call_qwen_api(
     })
     
     try:
-        logger.info(f"[AI Chat] 调用 DashScope API，模型: {config.qwen_model}")
+        logger.info(f"[AI Chat] 调用 DashScope API，模型: {config.model}")
         logger.debug(f"[AI Chat] 消息数量: {len(messages)}")
         
         # 调用 DashScope API
         response = Generation.call(
-            model=config.qwen_model,
+            model=config.model,
             messages=messages,
             result_format='message',
             max_tokens=config.max_tokens,

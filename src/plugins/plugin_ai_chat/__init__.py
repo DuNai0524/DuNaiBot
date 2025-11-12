@@ -8,17 +8,8 @@ from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageEvent
 from nonebot.adapters.onebot.v11.bot import Bot
 
-from .config import load_config, get_config
+from .config import get_config, reload_config
 from .ai_service import call_qwen_api, clear_user_context
-
-
-# 加载配置（可以在这里自定义配置）
-load_config(
-    # 在这里设置你的配置，例如：
-    # qwen_api_key="your-api-key-here",
-    # system_prompt="你是一个专业的编程助手，擅长解答技术问题。",
-    # temperature=0.7,
-)
 
 
 # AI 对话 - 通过 @机器人 触发
@@ -26,6 +17,9 @@ ai_chat = on_message(rule=to_me(), priority=10, block=True)
 
 # 清除上下文命令
 clear_context = on_command("清除对话", aliases={"重置对话", "清空上下文"}, priority=5)
+
+# 重载配置命令
+reload_config_cmd = on_command("重载ai配置", priority=5)
 
 
 @ai_chat.handle()
@@ -71,6 +65,17 @@ async def handle_clear_context(event: MessageEvent):
     )
     
     await clear_context.finish("已清除你的对话记录！", at_sender=True)
+
+
+@reload_config_cmd.handle()
+async def handle_reload_config(event: MessageEvent):
+    """重新加载配置"""
+    try:
+        reload_config()
+        await reload_config_cmd.finish("配置已重新加载！", at_sender=True)
+    except Exception as e:
+        logger.error(f"[AI Chat] 重载配置失败: {e}")
+        await reload_config_cmd.finish(f"重载配置失败：{str(e)}", at_sender=True)
 
 
 logger.opt(colors=True).success(
