@@ -9,7 +9,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageEvent
 from nonebot.adapters.onebot.v11.bot import Bot
 
 from .config import get_config, reload_config
-from .ai_service import call_qwen_api, clear_user_context
+from .ai_service import call_qwen_api, clear_user_context, split_message
 
 
 # AI 对话 - 通过 @机器人 触发
@@ -48,7 +48,15 @@ async def handle_ai_chat(event: MessageEvent, bot: Bot):
         f"[AI Chat] AI 回复: <g>{ai_reply}</g>"
     )
     
-    await ai_chat.finish(ai_reply, at_sender=True)
+    # 将长文本分段发送，使其更像聊天
+    segments = split_message(ai_reply, max_length=500)
+    
+    for i, segment in enumerate(segments):
+        # 最后一条消息使用 finish，其他消息使用 send
+        if i == len(segments) - 1:
+            await ai_chat.finish(segment, at_sender=True)
+        else:
+            await ai_chat.send(segment, at_sender=True)
 
 
 @clear_context.handle()

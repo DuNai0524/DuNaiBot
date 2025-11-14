@@ -139,3 +139,86 @@ def clear_user_context(user_id: str):
     """清除用户的对话上下文"""
     conversation_manager.clear_context(user_id)
     logger.info(f"[AI Chat] 清除用户 {user_id} 的对话上下文")
+
+
+def split_message(text: str, max_length: int = 500, split_by_paragraph: bool = True) -> List[str]:
+    """
+    将长文本分段，使其更像聊天消息
+    
+    Args:
+        text: 要分段的文本
+        max_length: 单条消息的最大长度（字符数）
+        split_by_paragraph: 是否优先按段落分割
+        
+    Returns:
+        List[str]: 分段后的消息列表
+    """
+    if len(text) <= max_length:
+        return [text]
+    
+    segments = []
+    
+    # 如果启用按段落分割，先尝试按段落分割
+    if split_by_paragraph:
+        paragraphs = text.split('\n\n')
+        current_segment = ""
+        
+        for paragraph in paragraphs:
+            # 清理段落
+            paragraph = paragraph.strip()
+            if not paragraph:
+                continue
+            
+            # 如果单个段落超过最大长度，需要进一步分割
+            if len(paragraph) > max_length:
+                # 先保存当前段
+                if current_segment:
+                    segments.append(current_segment.strip())
+                    current_segment = ""
+                
+                # 对长段落按句子分割
+                sentences = paragraph.split('。')
+                for sentence in sentences:
+                    sentence = sentence.strip()
+                    if not sentence:
+                        continue
+                    
+                    # 加上句号（除了最后一个句子）
+                    if sentence != sentences[-1]:
+                        sentence += '。'
+                    
+                    # 如果当前段加上新句子超过限制，就保存当前段
+                    if len(current_segment) + len(sentence) > max_length and current_segment:
+                        segments.append(current_segment.strip())
+                        current_segment = sentence
+                    else:
+                        current_segment += sentence
+            else:
+                # 如果加上当前段落会超过限制，先保存当前段
+                if len(current_segment) + len(paragraph) > max_length and current_segment:
+                    segments.append(current_segment.strip())
+                    current_segment = paragraph
+                else:
+                    if current_segment:
+                        current_segment += '\n\n' + paragraph
+                    else:
+                        current_segment = paragraph
+        
+        # 保存剩余的段
+        if current_segment:
+            segments.append(current_segment.strip())
+    else:
+        # 如果不按段落分割，直接按最大长度分割
+        current_segment = ""
+        for char in text:
+            if len(current_segment) < max_length:
+                current_segment += char
+            else:
+                if current_segment:
+                    segments.append(current_segment)
+                current_segment = char
+        
+        if current_segment:
+            segments.append(current_segment)
+    
+    return segments if segments else [text]
